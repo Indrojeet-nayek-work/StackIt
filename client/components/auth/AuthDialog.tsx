@@ -69,6 +69,10 @@ export function AuthDialog({
   const handleVerifyCode = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (typeof verifyCode !== "function") {
+      setError("Code verification is not available. Please contact support.");
+      return;
+    }
     try {
       // You may need to pass additional info to verifyCode
       if (currentTab === "login" && pendingLogin) {
