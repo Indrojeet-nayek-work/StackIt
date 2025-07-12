@@ -21,7 +21,11 @@
     "typecheck": "tsc"
   },
   "dependencies": {
-    "express": "^4.18.2",
+    "bcryptjs": "^3.0.2",
+    "dotenv": "^17.2.0",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.3",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -97,5 +101,19 @@
     "vaul": "^0.9.3",
     "vite": "^6.2.2",
     "vitest": "^3.1.4"
-  }
+  },
+  "version": "1.0.0",
+  "description": "Problem statement: StackIt – A Minimal Q&A Forum Platform\r Member details\r 1) Indrojeet Nayek: indrajeetnayak2004@gmail.com (Team leader)\r 2) Argha Dawn: arghadawn03@gmail.com\r 3) Harshit Ranjan Singh: harshit.x.singh@gmail.com\r 4) Pratyay Ghosh: pratyayghosh21012004@gmail.com",
+  "main": "postcss.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Indrojeet-nayek-work/StackIt.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Indrojeet-nayek-work/StackIt/issues"
+  },
+  "homepage": "https://github.com/Indrojeet-nayek-work/StackIt#readme"
 }
