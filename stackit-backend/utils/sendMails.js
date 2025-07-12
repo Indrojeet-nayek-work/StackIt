@@ -8,38 +8,18 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 });
+const sendMail = require('./utils/sendMail');
 
-function generateVerificationCode(length = 6) {
-  return Math.random().toString().slice(2, 2 + length).padEnd(length, '0');
-}
-
-/**
- * Send verification email for login or signup.
- * @param {string} to - Recipient email address.
- * @param {'login'|'signup'} type - Type of verification.
- * @returns {Promise<{info: object, code: string}>}
- */
-const sendVerificationEmail = async (to, type = 'signup') => {
-  const code = generateVerificationCode();
-  let subject, text;
-
-  if (type === 'login') {
-    subject = 'Login Verification Code';
-    text = `Your login verification code is: ${code}\n\nPlease input this code to continue.`;
-  } else {
-    subject = 'Signup Verification Code';
-    text = `Your signup verification code is: ${code}\n\nPlease input this code to continue.`;
-  }
-
-  const mailOptions = {
-    from: process.env.EMAIL_USER,
-    to,
-    subject,
-    text,
-  };
-
-  const info = await transporter.sendMail(mailOptions);
-  return { info, code };
+const mailOptions = {
+  from: process.env.EMAIL_USER,
+  to: 'recipient@example.com',
+  subject: 'Test Email from Nodemailer',
+  text: 'This is a test email sent using Gmail and Nodemailer!',
 };
 
-module.exports = sendVerificationEmail;
+transporter.sendMail(mailOptions, (error, info) => {
+  if (error) {
+    return console.log('Error:', error);
+  }
+  console.log('Email sent:', info.response);
+});
