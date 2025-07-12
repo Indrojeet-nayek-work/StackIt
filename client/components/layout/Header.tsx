@@ -405,7 +405,6 @@ export function Header() {
                         Profile
                       </Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>Settings</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout}>
                       Log out
