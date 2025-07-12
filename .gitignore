@@ -11,7 +11,13 @@ node_modules
 dist
 dist-ssr
 *.local
+<<<<<<< HEAD
 AGENTS.md
+=======
+.env
+AGENTS.md
+
+>>>>>>> bea2cfc1b8689cb4615e35ec7d5494b4bb77e217
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -22,5 +28,9 @@ AGENTS.md
 *.njsproj
 *.sln
 *.sw?
-
+.AGENTS.md
 .config/
+# Backend specific (Express)
+backend/node_modules/
+backend/.env
+backend/.DS_Store

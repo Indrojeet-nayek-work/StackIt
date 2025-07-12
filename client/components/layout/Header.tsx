@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Bell, Menu, Plus, Search, User, LogIn } from "lucide-react";
+import {
+  Bell,
+  Menu,
+  Plus,
+  Search,
+  User,
+  LogIn,
+  MessageSquare,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +32,11 @@ export function Header() {
     "login",
   );
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const notificationCount = 3;
+  const [notificationCount, setNotificationCount] = useState(3);
+
+  const markAllAsRead = () => {
+    setNotificationCount(0);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -47,82 +59,155 @@ export function Header() {
           <div className="flex items-center space-x-3">
             <ModeToggle />
 
-            {/* Mobile Menu */}
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <Menu className="h-5 w-5" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-80">
-                <div className="flex flex-col space-y-4 mt-6">
-                  <Link
-                    to="/questions"
-                    className="flex items-center py-2 text-lg font-medium"
-                    onClick={() => setMobileMenuOpen(false)}
+            {/* Mobile Profile or Menu */}
+            {isAuthenticated ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="flex items-center space-x-2"
                   >
-                    Questions
-                  </Link>
-
-                  {isAuthenticated && user?.role === "admin" && (
+                    <Avatar className="h-6 w-6">
+                      <AvatarFallback className="text-xs bg-reddit-orange text-white">
+                        {user?.avatar}
+                      </AvatarFallback>
+                    </Avatar>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <div className="flex items-center space-x-2 p-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-sm bg-reddit-orange text-white">
+                        {user?.avatar}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {user?.username}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {user?.email}
+                      </p>
+                    </div>
+                  </div>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/profile" className="flex items-center">
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/questions" className="flex items-center">
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Questions
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/ask" className="flex items-center">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Ask Question
+                    </Link>
+                  </DropdownMenuItem>
+                  {user?.role === "admin" && (
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/admin"
+                        className="flex items-center text-reddit-orange"
+                      >
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center w-full px-2 py-1.5 text-sm hover:bg-accent rounded-sm">
+                        <Bell className="mr-2 h-4 w-4" />
+                        Notifications
+                        {notificationCount > 0 && (
+                          <Badge
+                            variant="destructive"
+                            className="ml-2 h-5 w-5 rounded-full p-0 text-xs"
+                          >
+                            {notificationCount}
+                          </Badge>
+                        )}
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      side="bottom"
+                      align="end"
+                      className="w-72 max-w-[calc(100vw-2rem)]"
+                    >
+                      <div className="flex items-center justify-between p-2">
+                        <h4 className="text-sm font-semibold">Notifications</h4>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-xs"
+                          onClick={markAllAsRead}
+                        >
+                          Mark all read
+                        </Button>
+                      </div>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="flex flex-col items-start p-3">
+                        <div className="text-sm font-medium">
+                          New answer on your question
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          "How to implement authentication in React?"
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          2 minutes ago
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="flex flex-col items-start p-3">
+                        <div className="text-sm font-medium">
+                          Someone mentioned you
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          "@username check this solution"
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          1 hour ago
+                        </div>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem className="flex flex-col items-start p-3">
+                        <div className="text-sm font-medium">
+                          Comment on your answer
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          "Great explanation, thanks!"
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          3 hours ago
+                        </div>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout}>Log out</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="sm">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80">
+                  <div className="flex flex-col space-y-4 mt-6">
                     <Link
-                      to="/admin"
-                      className="flex items-center py-2 text-lg font-medium text-reddit-orange"
+                      to="/questions"
+                      className="flex items-center py-2 text-lg font-medium"
                       onClick={() => setMobileMenuOpen(false)}
                     >
-                      Admin Dashboard
+                      Questions
                     </Link>
-                  )}
 
-                  {isAuthenticated ? (
-                    <>
-                      <Link
-                        to="/ask"
-                        className="flex items-center py-2 text-lg font-medium"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        <Plus className="mr-2 h-5 w-5" />
-                        Ask Question
-                      </Link>
-
-                      <div className="border-t pt-4">
-                        <div className="flex items-center space-x-2 py-2">
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-sm bg-reddit-orange text-white">
-                              {user?.avatar}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{user?.username}</span>
-                        </div>
-
-                        <div className="flex flex-col space-y-2 mt-4">
-                          <Button variant="ghost" className="justify-start">
-                            <User className="mr-2 h-4 w-4" />
-                            Profile
-                          </Button>
-                          <Button variant="ghost" className="justify-start">
-                            <Bell className="mr-2 h-4 w-4" />
-                            Notifications
-                            {notificationCount > 0 && (
-                              <Badge
-                                variant="destructive"
-                                className="ml-2 h-5 w-5 rounded-full p-0 text-xs"
-                              >
-                                {notificationCount}
-                              </Badge>
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            className="justify-start"
-                            onClick={logout}
-                          >
-                            Log out
-                          </Button>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
                     <div className="flex flex-col space-y-3 pt-4 border-t">
                       <Button
                         className="w-full bg-reddit-orange hover:bg-reddit-orange/90"
@@ -147,10 +232,10 @@ export function Header() {
                         Login
                       </Button>
                     </div>
-                  )}
-                </div>
-              </SheetContent>
-            </Sheet>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
           </div>
         </div>
 
@@ -250,7 +335,12 @@ export function Header() {
                   <DropdownMenuContent align="end" className="w-80">
                     <div className="flex items-center justify-between p-2">
                       <h4 className="text-sm font-semibold">Notifications</h4>
-                      <Button variant="ghost" size="sm" className="text-xs">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs"
+                        onClick={markAllAsRead}
+                      >
                         Mark all read
                       </Button>
                     </div>
@@ -309,9 +399,11 @@ export function Header() {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>Settings</DropdownMenuItem>
                     <DropdownMenuSeparator />

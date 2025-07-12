@@ -8,6 +8,12 @@ import {
   Check,
   LogIn,
   ArrowLeft,
+  Bold,
+  Italic,
+  List,
+  Link as LinkIcon,
+  Image,
+  Smile,
 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -17,30 +23,58 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+interface EditorButtonProps {
+  icon: React.ReactNode;
+  tooltip: string;
+  onClick: () => void;
+  isActive?: boolean;
+}
+
+function EditorButton({ icon, tooltip, onClick, isActive }: EditorButtonProps) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button
+          variant={isActive ? "default" : "ghost"}
+          size="sm"
+          onClick={onClick}
+          type="button"
+        >
+          {icon}
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{tooltip}</p>
+      </TooltipContent>
+    </Tooltip>
+  );
+}
 
 export default function QuestionDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [authDialogOpen, setAuthDialogOpen] = useState(false);
   const [authDialogTab, setAuthDialogTab] = useState<"login" | "signup">(
     "signup",
   );
-
-  const mockQuestion = {
-    id: 1,
-    title: "How to implement authentication in React?",
-    description:
-      "I'm trying to build a React application with user authentication. What's the best approach for handling login/logout and protecting routes? I've looked into using JWT tokens but I'm not sure about the security implications and best practices.",
-    author: "john_doe",
-    authorAvatar: "JD",
-    votes: 15,
-    views: 234,
-    tags: ["React", "Authentication", "JWT"],
-    createdAt: "2 hours ago",
-  };
-
-  const mockAnswers = [
+  const [answerContent, setAnswerContent] = useState("");
+  const [questionVotes, setQuestionVotes] = useState(15);
+  const [questionUserVote, setQuestionUserVote] = useState<
+    "up" | "down" | null
+  >(null);
+  const [answers, setAnswers] = useState([
     {
       id: 1,
       content:
@@ -48,6 +82,7 @@ export default function QuestionDetail() {
       author: "sarah_dev",
       authorAvatar: "SD",
       votes: 23,
+      userVote: null as "up" | "down" | null,
       isAccepted: true,
       createdAt: "1 hour ago",
     },
@@ -58,10 +93,95 @@ export default function QuestionDetail() {
       author: "mike_architect",
       authorAvatar: "MA",
       votes: 8,
+      userVote: null as "up" | "down" | null,
       isAccepted: false,
       createdAt: "30 minutes ago",
     },
-  ];
+  ]);
+
+  const mockQuestion = {
+    id: 1,
+    title: "How to implement authentication in React?",
+    description:
+      "I'm trying to build a React application with user authentication. What's the best approach for handling login/logout and protecting routes? I've looked into using JWT tokens but I'm not sure about the security implications and best practices.",
+    author: "john_doe",
+    authorAvatar: "JD",
+    views: 234,
+    tags: ["React", "Authentication", "JWT"],
+    createdAt: "2 hours ago",
+  };
+
+  const handleQuestionVote = (type: "up" | "down") => {
+    if (!isAuthenticated) return;
+
+    if (questionUserVote === type) {
+      setQuestionVotes((prev) => prev + (type === "up" ? -1 : 1));
+      setQuestionUserVote(null);
+    } else if (questionUserVote === null) {
+      setQuestionVotes((prev) => prev + (type === "up" ? 1 : -1));
+      setQuestionUserVote(type);
+    } else {
+      setQuestionVotes((prev) => prev + (type === "up" ? 2 : -2));
+      setQuestionUserVote(type);
+    }
+  };
+
+  const handleAnswerVote = (answerId: number, type: "up" | "down") => {
+    if (!isAuthenticated) return;
+
+    setAnswers((prevAnswers) =>
+      prevAnswers.map((answer) => {
+        if (answer.id === answerId) {
+          let newVotes = answer.votes;
+          let newUserVote = answer.userVote;
+
+          if (newUserVote === type) {
+            newVotes += type === "up" ? -1 : 1;
+            newUserVote = null;
+          } else if (newUserVote === null) {
+            newVotes += type === "up" ? 1 : -1;
+            newUserVote = type;
+          } else {
+            newVotes += type === "up" ? 2 : -2;
+            newUserVote = type;
+          }
+
+          return { ...answer, votes: newVotes, userVote: newUserVote };
+        }
+        return answer;
+      }),
+    );
+  };
+
+  const formatText = (command: string, value?: string) => {
+    document.execCommand(command, false, value);
+  };
+
+  const handleSubmitAnswer = () => {
+    if (!answerContent.trim()) return;
+
+    const newAnswer = {
+      id: answers.length + 1,
+      content: answerContent,
+      author: user?.username || "anonymous",
+      authorAvatar: user?.avatar || "AN",
+      votes: 0,
+      userVote: null as "up" | "down" | null,
+      isAccepted: false,
+      createdAt: "just now",
+    };
+
+    setAnswers([...answers, newAnswer]);
+    setAnswerContent("");
+
+    // Clear the contentEditable div
+    const editorDiv = document.querySelector(
+      '[contenteditable="true"]',
+    ) as HTMLDivElement;
+    if (editorDiv) {
+      editorDiv.innerHTML = "";
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -76,6 +196,8 @@ export default function QuestionDetail() {
           Back
         </Button>
       </div>
+
+      {/* Question Card */}
       <Card className="mb-6">
         <CardHeader className="pb-4">
           <h1 className="text-xl sm:text-2xl font-bold leading-tight break-words">
@@ -94,13 +216,33 @@ export default function QuestionDetail() {
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Voting section */}
             <div className="flex sm:flex-col items-center sm:items-center space-x-4 sm:space-x-0 sm:space-y-2 order-2 sm:order-1">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`h-8 w-8 p-0 hover:bg-upvote/10 hover:text-upvote ${
+                  questionUserVote === "up" ? "bg-upvote/20 text-upvote" : ""
+                }`}
+                disabled={!isAuthenticated}
+                onClick={() => handleQuestionVote("up")}
+                title={!isAuthenticated ? "Login to vote" : "Upvote"}
+              >
                 <ArrowUp className="h-5 w-5" />
               </Button>
               <span className="text-lg font-medium min-w-0">
-                {mockQuestion.votes}
+                {questionVotes}
               </span>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`h-8 w-8 p-0 hover:bg-downvote/10 hover:text-downvote ${
+                  questionUserVote === "down"
+                    ? "bg-downvote/20 text-downvote"
+                    : ""
+                }`}
+                disabled={!isAuthenticated}
+                onClick={() => handleQuestionVote("down")}
+                title={!isAuthenticated ? "Login to vote" : "Downvote"}
+              >
                 <ArrowDown className="h-5 w-5" />
               </Button>
             </div>
@@ -139,14 +281,15 @@ export default function QuestionDetail() {
         </CardContent>
       </Card>
 
+      {/* Answers Section */}
       <div className="mb-4">
         <h2 className="text-lg sm:text-xl font-semibold mb-4">
-          {mockAnswers.length} Answers
+          {answers.length} Answers
         </h2>
       </div>
 
       <div className="space-y-4 sm:space-y-6">
-        {mockAnswers.map((answer) => (
+        {answers.map((answer) => (
           <Card
             key={answer.id}
             className={
@@ -159,13 +302,33 @@ export default function QuestionDetail() {
               <div className="flex flex-col sm:flex-row gap-4">
                 {/* Voting section */}
                 <div className="flex sm:flex-col items-center sm:items-center space-x-4 sm:space-x-0 sm:space-y-2 order-2 sm:order-1">
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-8 w-8 p-0 hover:bg-upvote/10 hover:text-upvote ${
+                      answer.userVote === "up" ? "bg-upvote/20 text-upvote" : ""
+                    }`}
+                    disabled={!isAuthenticated}
+                    onClick={() => handleAnswerVote(answer.id, "up")}
+                    title={!isAuthenticated ? "Login to vote" : "Upvote"}
+                  >
                     <ArrowUp className="h-5 w-5" />
                   </Button>
                   <span className="text-lg font-medium min-w-0">
                     {answer.votes}
                   </span>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={`h-8 w-8 p-0 hover:bg-downvote/10 hover:text-downvote ${
+                      answer.userVote === "down"
+                        ? "bg-downvote/20 text-downvote"
+                        : ""
+                    }`}
+                    disabled={!isAuthenticated}
+                    onClick={() => handleAnswerVote(answer.id, "down")}
+                    title={!isAuthenticated ? "Login to vote" : "Downvote"}
+                  >
                     <ArrowDown className="h-5 w-5" />
                   </Button>
                   {answer.isAccepted && (
@@ -216,14 +379,141 @@ export default function QuestionDetail() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="min-h-[200px] p-4 border rounded-lg bg-background">
-                <p className="text-muted-foreground">
-                  Write your answer here using the rich text editor...
-                </p>
+              {/* Editor toolbar */}
+              <div className="border rounded-lg">
+                <div className="flex flex-wrap items-center gap-1 p-2 border-b bg-muted/50">
+                  <EditorButton
+                    icon={<Bold className="h-4 w-4" />}
+                    tooltip="Bold"
+                    onClick={() => formatText("bold")}
+                  />
+                  <EditorButton
+                    icon={<Italic className="h-4 w-4" />}
+                    tooltip="Italic"
+                    onClick={() => formatText("italic")}
+                  />
+                  <Separator orientation="vertical" className="h-6 mx-1" />
+                  <EditorButton
+                    icon={<List className="h-4 w-4" />}
+                    tooltip="Bullet List"
+                    onClick={() => formatText("insertUnorderedList")}
+                  />
+                  <Separator orientation="vertical" className="h-6 mx-1" />
+                  <EditorButton
+                    icon={<LinkIcon className="h-4 w-4" />}
+                    tooltip="Insert Link"
+                    onClick={() => {
+                      const url = prompt("Enter URL:");
+                      if (url) formatText("createLink", url);
+                    }}
+                  />
+                  <EditorButton
+                    icon={<Image className="h-4 w-4" />}
+                    tooltip="Insert Image"
+                    onClick={() => {
+                      const input = document.createElement("input");
+                      input.type = "file";
+                      input.accept = "image/*";
+                      input.onchange = (e) => {
+                        const file = (e.target as HTMLInputElement).files?.[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onload = (e) => {
+                            const dataUrl = e.target?.result as string;
+                            formatText("insertImage", dataUrl);
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      };
+                      input.click();
+                    }}
+                  />
+                  <Separator orientation="vertical" className="h-6 mx-1" />
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        type="button"
+                        className="h-8 w-8 p-0"
+                      >
+                        <Smile className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent className="w-48 p-2">
+                      <div className="grid grid-cols-8 gap-1">
+                        {[
+                          "😀",
+                          "😃",
+                          "😄",
+                          "😁",
+                          "😅",
+                          "😂",
+                          "🤣",
+                          "😊",
+                          "😇",
+                          "🙂",
+                          "🙃",
+                          "😉",
+                          "😌",
+                          "😍",
+                          "🥰",
+                          "😘",
+                          "😗",
+                          "😙",
+                          "😚",
+                          "😋",
+                          "😛",
+                          "😝",
+                          "😜",
+                          "🤪",
+                          "🤨",
+                          "🧐",
+                          "🤓",
+                          "😎",
+                          "🤩",
+                          "🥳",
+                          "😏",
+                          "😒",
+                        ].map((emoji) => (
+                          <button
+                            key={emoji}
+                            type="button"
+                            className="p-1 hover:bg-accent rounded text-lg"
+                            onClick={() => {
+                              formatText("insertText", emoji);
+                            }}
+                          >
+                            {emoji}
+                          </button>
+                        ))}
+                      </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div
+                  contentEditable
+                  className="min-h-[200px] p-4 focus:outline-none prose prose-sm max-w-none"
+                  style={{ whiteSpace: "pre-wrap" }}
+                  onInput={(e) =>
+                    setAnswerContent(e.currentTarget.textContent || "")
+                  }
+                  data-placeholder="Write your answer here. Be clear and helpful!"
+                />
               </div>
-              <Button className="bg-reddit-orange hover:bg-reddit-orange/90">
-                Post Your Answer
-              </Button>
+
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Your answer will help others in the community
+                </p>
+                <Button
+                  className="bg-reddit-orange hover:bg-reddit-orange/90"
+                  onClick={handleSubmitAnswer}
+                  disabled={!answerContent.trim()}
+                >
+                  Post Your Answer
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

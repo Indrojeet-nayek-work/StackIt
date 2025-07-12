@@ -24,6 +24,11 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 
 interface EditorButtonProps {
@@ -181,8 +186,21 @@ export default function AskQuestion() {
                   icon={<Image className="h-4 w-4" />}
                   tooltip="Insert Image"
                   onClick={() => {
-                    const url = prompt("Enter image URL:");
-                    if (url) formatText("insertImage", url);
+                    const input = document.createElement("input");
+                    input.type = "file";
+                    input.accept = "image/*";
+                    input.onchange = (e) => {
+                      const file = (e.target as HTMLInputElement).files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                          const dataUrl = e.target?.result as string;
+                          formatText("insertImage", dataUrl);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    };
+                    input.click();
                   }}
                 />
                 <Separator orientation="vertical" className="h-6 mx-1" />
@@ -202,14 +220,67 @@ export default function AskQuestion() {
                   onClick={() => formatText("justifyRight")}
                 />
                 <Separator orientation="vertical" className="h-6 mx-1" />
-                <EditorButton
-                  icon={<Smile className="h-4 w-4" />}
-                  tooltip="Insert Emoji"
-                  onClick={() => {
-                    const emoji = prompt("Enter emoji:");
-                    if (emoji) formatText("insertText", emoji);
-                  }}
-                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      className="h-8 w-8 p-0"
+                    >
+                      <Smile className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-48 p-2">
+                    <div className="grid grid-cols-8 gap-1">
+                      {[
+                        "😀",
+                        "😃",
+                        "😄",
+                        "😁",
+                        "😅",
+                        "😂",
+                        "🤣",
+                        "😊",
+                        "😇",
+                        "🙂",
+                        "🙃",
+                        "😉",
+                        "😌",
+                        "😍",
+                        "🥰",
+                        "😘",
+                        "😗",
+                        "😙",
+                        "😚",
+                        "😋",
+                        "😛",
+                        "😝",
+                        "😜",
+                        "🤪",
+                        "🤨",
+                        "🧐",
+                        "🤓",
+                        "😎",
+                        "🤩",
+                        "🥳",
+                        "😏",
+                        "😒",
+                      ].map((emoji) => (
+                        <button
+                          key={emoji}
+                          type="button"
+                          className="p-1 hover:bg-accent rounded text-lg"
+                          onClick={() => {
+                            formatText("insertText", emoji);
+                          }}
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
               <div
                 contentEditable
@@ -264,7 +335,7 @@ export default function AskQuestion() {
         </Card>
 
         <div className="flex items-center justify-between">
-          <Button type="button" variant="outline" onClick={() => navigate("/")}>
+          <Button type="button" variant="outline" onClick={() => navigate(-1)}>
             Cancel
           </Button>
           <Button type="submit" disabled={!title.trim() || !description.trim()}>

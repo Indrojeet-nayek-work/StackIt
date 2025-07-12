@@ -178,36 +178,63 @@ const mockQuestions: Question[] = [
 
 function QuestionCard({ question }: { question: Question }) {
   const { isAuthenticated } = useAuth();
+  const [votes, setVotes] = useState(question.votes);
+  const [userVote, setUserVote] = useState<"up" | "down" | null>(null);
+
+  const handleVote = (type: "up" | "down") => {
+    if (!isAuthenticated) return;
+
+    if (userVote === type) {
+      // Remove vote
+      setVotes((prev) => prev + (type === "up" ? -1 : 1));
+      setUserVote(null);
+    } else if (userVote === null) {
+      // Add vote
+      setVotes((prev) => prev + (type === "up" ? 1 : -1));
+      setUserVote(type);
+    } else {
+      // Change vote
+      setVotes((prev) => prev + (type === "up" ? 2 : -2));
+      setUserVote(type);
+    }
+  };
 
   const handleReport = () => {
-    // Implement report functionality
     console.log("Reporting question:", question.id);
-    // In a real app, this would send a report to the backend
     alert(
       "Question reported successfully. Thank you for keeping our community safe!",
     );
   };
+
   return (
     <Card className="hover:shadow-lg transition-all duration-200 border-l-4 border-l-reddit-orange/20 hover:border-l-reddit-orange">
       <CardContent className="p-0">
-        <div className="flex">
+        <div className="flex flex-col sm:flex-row">
           {/* Voting sidebar */}
-          <div className="flex flex-col items-center p-4 bg-muted/30 border-r">
+          <div className="flex sm:flex-col items-center justify-center sm:justify-start p-2 sm:p-4 bg-muted/30 border-b sm:border-b-0 sm:border-r order-2 sm:order-1">
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 hover:bg-upvote/10 hover:text-upvote"
+              className={`h-8 w-8 p-0 hover:bg-upvote/10 hover:text-upvote ${
+                userVote === "up" ? "bg-upvote/20 text-upvote" : ""
+              }`}
               disabled={!isAuthenticated}
+              onClick={() => handleVote("up")}
               title={!isAuthenticated ? "Login to vote" : "Upvote"}
             >
               <ArrowUp className="h-4 w-4" />
             </Button>
-            <span className="text-sm font-medium py-1">{question.votes}</span>
+            <span className="text-sm font-medium py-1 mx-2 sm:mx-0">
+              {votes}
+            </span>
             <Button
               variant="ghost"
               size="sm"
-              className="h-8 w-8 p-0 hover:bg-downvote/10 hover:text-downvote"
+              className={`h-8 w-8 p-0 hover:bg-downvote/10 hover:text-downvote ${
+                userVote === "down" ? "bg-downvote/20 text-downvote" : ""
+              }`}
               disabled={!isAuthenticated}
+              onClick={() => handleVote("down")}
               title={!isAuthenticated ? "Login to vote" : "Downvote"}
             >
               <ArrowDown className="h-4 w-4" />
@@ -215,22 +242,20 @@ function QuestionCard({ question }: { question: Question }) {
           </div>
 
           {/* Main content */}
-          <div className="flex-1 p-4">
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex-1">
-                <Link
-                  to={`/question/${question.id}`}
-                  className="text-lg font-semibold hover:text-reddit-orange transition-colors"
-                >
-                  {question.title}
-                </Link>
-                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                  {question.description}
-                </p>
-              </div>
+          <div className="flex-1 p-3 sm:p-4 order-1 sm:order-2 min-w-0">
+            <div className="mb-2">
+              <Link
+                to={`/question/${question.id}`}
+                className="text-base sm:text-lg font-semibold hover:text-reddit-orange transition-colors block break-words"
+              >
+                {question.title}
+              </Link>
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-2 break-words">
+                {question.description}
+              </p>
             </div>
 
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-1 sm:gap-2 mb-3">
               {question.tags.map((tag) => (
                 <Badge
                   key={tag}
@@ -238,40 +263,44 @@ function QuestionCard({ question }: { question: Question }) {
                   className="text-xs bg-reddit-blue/10 text-reddit-blue hover:bg-reddit-blue/20 border-reddit-blue/20"
                 >
                   <Tag className="h-3 w-3 mr-1" />
-                  {tag}
+                  <span className="truncate max-w-20 sm:max-w-none">{tag}</span>
                 </Badge>
               ))}
             </div>
 
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center space-x-3 sm:space-x-4">
                 <div className="flex items-center space-x-1">
-                  <MessageSquare className="h-4 w-4" />
-                  <span>{question.answers} answers</span>
+                  <MessageSquare className="h-4 w-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">
+                    {question.answers} answers
+                  </span>
                   {question.hasAcceptedAnswer && (
-                    <span className="text-success ml-1">✓</span>
+                    <span className="text-success ml-1 flex-shrink-0">✓</span>
                   )}
                 </div>
                 <div className="flex items-center space-x-1">
-                  <Eye className="h-4 w-4" />
-                  <span>{question.views} views</span>
+                  <Eye className="h-4 w-4 flex-shrink-0" />
+                  <span className="whitespace-nowrap">
+                    {question.views} views
+                  </span>
                 </div>
                 {isAuthenticated && (
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={handleReport}
-                    className="h-6 px-2 text-xs hover:bg-red-50 hover:text-red-600"
+                    className="h-6 px-2 text-xs hover:bg-red-50 hover:text-red-600 flex-shrink-0"
                   >
                     <Flag className="h-3 w-3 mr-1" />
-                    Report
+                    <span className="hidden sm:inline">Report</span>
                   </Button>
                 )}
               </div>
-              <div className="flex items-center space-x-2">
-                <span className="text-sm">
+              <div className="flex items-center space-x-2 min-w-0">
+                <span className="text-xs sm:text-sm break-words">
                   by{" "}
-                  <span className="text-reddit-orange font-medium">
+                  <span className="text-reddit-orange font-medium truncate max-w-24 sm:max-w-none inline-block">
                     {question.author}
                   </span>{" "}
                   • {question.createdAt}
@@ -325,8 +354,9 @@ export default function Questions() {
   const clearFilters = () => {
     setSearchParams({});
   };
+
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4">
       {/* Back Button */}
       <div className="mb-4">
         <Button
@@ -338,15 +368,16 @@ export default function Questions() {
           Back to Home
         </Button>
       </div>
+
       {!isAuthenticated && (
         <Alert className="mb-6 border-reddit-orange/20 bg-gradient-to-r from-reddit-orange/5 to-reddit-blue/5">
           <UserPlus className="h-4 w-4" />
-          <AlertDescription className="flex items-center justify-between">
+          <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <span>
               <strong>Welcome to StackIt!</strong> Join our community to ask
               questions, share knowledge, and get help from developers.
             </span>
-            <div className="flex space-x-2 ml-4">
+            <div className="flex space-x-2">
               <Button
                 variant="outline"
                 size="sm"
@@ -372,10 +403,10 @@ export default function Questions() {
         </Alert>
       )}
 
-      <div className="flex items-center justify-between mb-6 p-6 bg-gradient-to-r from-reddit-orange/5 to-reddit-blue/5 rounded-lg border border-reddit-orange/20">
-        <div className="flex-1">
-          <div className="flex items-center gap-2 mb-2">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-reddit-orange to-reddit-blue bg-clip-text text-transparent">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 p-4 sm:p-6 bg-gradient-to-r from-reddit-orange/5 to-reddit-blue/5 rounded-lg border border-reddit-orange/20">
+        <div className="flex-1 mb-4 sm:mb-0">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-2">
+            <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-reddit-orange to-reddit-blue bg-clip-text text-transparent">
               Questions
             </h1>
             {(topicFilter || techFilter) && (
@@ -383,7 +414,7 @@ export default function Questions() {
                 variant="ghost"
                 size="sm"
                 onClick={clearFilters}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground w-fit"
               >
                 <X className="h-4 w-4 mr-1" />
                 Clear filters
@@ -413,58 +444,66 @@ export default function Questions() {
             </div>
           )}
 
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm sm:text-base">
             {topicFilter || techFilter
               ? `Showing ${filteredQuestions.length} questions matching your filters`
               : "Find answers to your questions and help others in the community"}
           </p>
         </div>
-        {isAuthenticated ? (
-          <Link to="/ask">
-            <Button className="bg-reddit-orange hover:bg-reddit-orange/90 text-white font-semibold px-6 py-2 shadow-md">
-              Ask Question
+
+        <div className="flex-shrink-0">
+          {isAuthenticated ? (
+            <Link to="/ask">
+              <Button className="bg-reddit-orange hover:bg-reddit-orange/90 text-white font-semibold px-4 sm:px-6 py-2 shadow-md">
+                Ask Question
+              </Button>
+            </Link>
+          ) : (
+            <Button
+              className="bg-reddit-orange hover:bg-reddit-orange/90 text-white font-semibold px-4 sm:px-6 py-2 shadow-md"
+              onClick={() => {
+                setAuthDialogTab("signup");
+                setAuthDialogOpen(true);
+              }}
+            >
+              Join to Ask
             </Button>
-          </Link>
-        ) : (
-          <Button
-            className="bg-reddit-orange hover:bg-reddit-orange/90 text-white font-semibold px-6 py-2 shadow-md"
-            onClick={() => {
-              setAuthDialogTab("signup");
-              setAuthDialogOpen(true);
-            }}
-          >
-            Join to Ask
-          </Button>
-        )}
+          )}
+        </div>
       </div>
 
       <Tabs defaultValue="newest" className="mb-6">
-        <TabsList className="bg-muted/50 p-1">
+        <TabsList className="bg-muted/50 p-1 w-full grid grid-cols-4 h-auto">
           <TabsTrigger
             value="newest"
-            className="data-[state=active]:bg-reddit-orange data-[state=active]:text-white"
+            className="data-[state=active]:bg-reddit-orange data-[state=active]:text-white text-xs px-1 py-2 h-auto whitespace-nowrap overflow-hidden"
           >
-            Newest
+            <span className="hidden sm:inline">Newest</span>
+            <span className="sm:hidden">New</span>
           </TabsTrigger>
           <TabsTrigger
             value="trending"
-            className="data-[state=active]:bg-reddit-orange data-[state=active]:text-white"
+            className="data-[state=active]:bg-reddit-orange data-[state=active]:text-white text-xs px-1 py-2 h-auto whitespace-nowrap overflow-hidden"
           >
-            🔥 Trending
+            <span className="hidden sm:inline">🔥 Trending</span>
+            <span className="sm:hidden">🔥</span>
           </TabsTrigger>
           <TabsTrigger
             value="unanswered"
-            className="data-[state=active]:bg-warning data-[state=active]:text-white"
+            className="data-[state=active]:bg-warning data-[state=active]:text-white text-xs px-1 py-2 h-auto whitespace-nowrap overflow-hidden"
           >
-            ❓ Unanswered
+            <span className="hidden sm:inline">❓ Unanswered</span>
+            <span className="sm:hidden">❓</span>
           </TabsTrigger>
           <TabsTrigger
             value="answered"
-            className="data-[state=active]:bg-success data-[state=active]:text-white"
+            className="data-[state=active]:bg-success data-[state=active]:text-white text-xs px-1 py-2 h-auto whitespace-nowrap overflow-hidden"
           >
-            ✅ Answered
+            <span className="hidden sm:inline">✅ Answered</span>
+            <span className="sm:hidden">✅</span>
           </TabsTrigger>
         </TabsList>
+
         <TabsContent value="newest" className="space-y-4 mt-6">
           {filteredQuestions.length > 0 ? (
             filteredQuestions.map((question) => (
@@ -479,6 +518,7 @@ export default function Questions() {
             </div>
           )}
         </TabsContent>
+
         <TabsContent value="trending" className="space-y-4 mt-6">
           {filteredQuestions.length > 0 ? (
             filteredQuestions
@@ -495,6 +535,7 @@ export default function Questions() {
             </div>
           )}
         </TabsContent>
+
         <TabsContent value="unanswered" className="space-y-4 mt-6">
           {filteredQuestions.filter((q) => !q.hasAcceptedAnswer).length > 0 ? (
             filteredQuestions
@@ -511,6 +552,7 @@ export default function Questions() {
             </div>
           )}
         </TabsContent>
+
         <TabsContent value="answered" className="space-y-4 mt-6">
           {filteredQuestions.filter((q) => q.hasAcceptedAnswer).length > 0 ? (
             filteredQuestions

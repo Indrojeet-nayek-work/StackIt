@@ -152,46 +152,56 @@ export default function LandingPage() {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-80">
                   <div className="flex flex-col space-y-4 mt-6">
-                    <Link
-                      to="/questions"
-                      className="flex items-center py-2 text-lg font-medium"
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      Questions
-                    </Link>
-
                     {isAuthenticated ? (
-                      <Link
-                        to="/questions"
-                        className="flex items-center py-2 text-lg font-medium"
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        Go to Questions
-                      </Link>
+                      <>
+                        <Link
+                          to="/questions"
+                          className="flex items-center py-2 text-lg font-medium"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Go to Questions
+                        </Link>
+                        <Link
+                          to="/profile"
+                          className="flex items-center py-2 text-lg font-medium"
+                          onClick={() => setMobileMenuOpen(false)}
+                        >
+                          Profile
+                        </Link>
+                      </>
                     ) : (
-                      <div className="flex flex-col space-y-3 pt-4 border-t">
-                        <Button
-                          className="w-full bg-reddit-orange hover:bg-reddit-orange/90"
-                          onClick={() => {
-                            setAuthDialogTab("signup");
-                            setAuthDialogOpen(true);
-                            setMobileMenuOpen(false);
-                          }}
+                      <>
+                        <Link
+                          to="/questions"
+                          className="flex items-center py-2 text-lg font-medium"
+                          onClick={() => setMobileMenuOpen(false)}
                         >
-                          Join Free
-                        </Button>
-                        <Button
-                          variant="outline"
-                          className="w-full"
-                          onClick={() => {
-                            setAuthDialogTab("login");
-                            setAuthDialogOpen(true);
-                            setMobileMenuOpen(false);
-                          }}
-                        >
-                          Sign In
-                        </Button>
-                      </div>
+                          Questions
+                        </Link>
+                        <div className="flex flex-col space-y-3 pt-4 border-t">
+                          <Button
+                            className="w-full bg-reddit-orange hover:bg-reddit-orange/90"
+                            onClick={() => {
+                              setAuthDialogTab("signup");
+                              setAuthDialogOpen(true);
+                              setMobileMenuOpen(false);
+                            }}
+                          >
+                            Join Free
+                          </Button>
+                          <Button
+                            variant="outline"
+                            className="w-full"
+                            onClick={() => {
+                              setAuthDialogTab("login");
+                              setAuthDialogOpen(true);
+                              setMobileMenuOpen(false);
+                            }}
+                          >
+                            Sign In
+                          </Button>
+                        </div>
+                      </>
                     )}
                   </div>
                 </SheetContent>
@@ -217,17 +227,24 @@ export default function LandingPage() {
             </div>
 
             <nav className="flex items-center space-x-4">
-              <Link
-                to="/questions"
-                className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
-              >
-                Questions
-              </Link>
+              {!isAuthenticated && (
+                <Link
+                  to="/questions"
+                  className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors"
+                >
+                  Questions
+                </Link>
+              )}
               <ModeToggle />
               {isAuthenticated ? (
-                <Link to="/questions">
-                  <Button variant="outline">Go to Questions</Button>
-                </Link>
+                <div className="flex items-center space-x-3">
+                  <Link to="/questions">
+                    <Button variant="outline">Go to Questions</Button>
+                  </Link>
+                  <Link to="/profile">
+                    <Button variant="ghost">Profile</Button>
+                  </Link>
+                </div>
               ) : (
                 <div className="flex items-center space-x-3">
                   <Button
