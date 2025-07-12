@@ -1,2 +1,10 @@
-# StackIt
-StackIt is a streamlined question-and-answer platform focused on simplicity, community learning, and structured knowledge sharing. Designed with minimalism and usability in mind, it supports essential features for collaborative discussion in a clean, user-friendly interface.
+Problem statement: StackIt – A Minimal Q&A Forum Platform
+Member details
+1) Indrojeet Nayek: indrajeetnayak2004@gmail.com (Team leader)
+2) Argha Dawn: arghadawn03@gmail.com
+3) Harshit Ranjan Singh: harshit.x.singh@gmail.com
+4) Pratyay Ghosh: pratyayghosh21012004@gmail.com
+
+
+
+
