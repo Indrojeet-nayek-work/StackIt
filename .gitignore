@@ -26,7 +26,6 @@ AGENTS.md
 *.njsproj
 *.sln
 *.sw?
-.AGENTS.md
 .config/
 # Backend specific (Express)
 backend/node_modules/
