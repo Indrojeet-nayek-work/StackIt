@@ -14,6 +14,7 @@ import Questions from "./pages/Questions";
 import AskQuestion from "./pages/AskQuestion";
 import QuestionDetail from "./pages/QuestionDetail";
 import AdminDashboard from "./pages/AdminDashboard";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import { AdminRoute } from "./components/AdminRoute";
 
@@ -33,6 +34,7 @@ const App = () => (
                 <Route path="/questions" element={<Questions />} />
                 <Route path="/ask" element={<AskQuestion />} />
                 <Route path="/question/:id" element={<QuestionDetail />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route
                   path="/admin"
                   element={
