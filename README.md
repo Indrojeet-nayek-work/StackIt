@@ -5,6 +5,7 @@ Member details
 3) Harshit Ranjan Singh: harshit.x.singh@gmail.com
 4) Pratyay Ghosh: pratyayghosh21012004@gmail.com
 
+Video Link: https://drive.google.com/drive/folders/1VbIIeZs_o6c57IOvFm0y38VRC04fK40S
 
 
 
