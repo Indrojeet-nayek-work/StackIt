@@ -452,13 +452,6 @@ export default function Questions() {
         </div>
 
         <div className="flex-shrink-0">
-          {isAuthenticated && (
-            <Link to="/ask">
-              <Button className="bg-reddit-orange hover:bg-reddit-orange/90 font-semibold">
-                Ask a Question
-              </Button>
-            </Link>
-          )}
           {isAuthenticated ? (
             <Link to="/ask">
               <Button className="bg-reddit-orange hover:bg-reddit-orange/90 text-white font-semibold px-4 sm:px-6 py-2 shadow-md">
