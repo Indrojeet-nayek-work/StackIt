@@ -109,14 +109,6 @@ export default function Profile() {
   useEffect(() => {
     if (!isAuthenticated) {
       navigate("/");
-    } else {
-      // Test notification for mobile
-      setTimeout(() => {
-        toast({
-          title: "Welcome to your profile!",
-          description: "Notifications are working correctly on mobile.",
-        });
-      }, 1000);
     }
   }, [isAuthenticated, navigate]);
 
