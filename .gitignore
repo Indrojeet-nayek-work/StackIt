@@ -11,13 +11,11 @@ node_modules
 dist
 dist-ssr
 *.local
-<<<<<<< HEAD
-AGENTS.md
-=======
-.env
 AGENTS.md
 
->>>>>>> bea2cfc1b8689cb4615e35ec7d5494b4bb77e217
+stackit-backend\.env
+AGENTS.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
