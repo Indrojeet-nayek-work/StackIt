@@ -9,28 +9,23 @@ import {
 import { useTheme } from "@/components/theme-provider";
 
 export function ModeToggle() {
-  const { setTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
+
+  // Determine current effective theme
+  let effectiveTheme = theme;
+  if (theme === "system") {
+    effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+
+  const toggleTheme = () => {
+    setTheme(effectiveTheme === "dark" ? "light" : "dark");
+  };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm">
-          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
-          Light
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
-          Dark
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
-          System
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <Button variant="ghost" size="sm" onClick={toggleTheme} aria-label="Toggle theme">
+      <Sun className={`h-4 w-4 transition-all ${effectiveTheme === "light" ? "" : "dark:-rotate-90 dark:scale-0"}`} />
+      <Moon className={`absolute h-4 w-4 transition-all ${effectiveTheme === "dark" ? "rotate-0 scale-100" : "rotate-90 scale-0"}`} />
+      <span className="sr-only">Toggle theme</span>
+    </Button>
   );
 }
